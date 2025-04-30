@@ -2,35 +2,18 @@ package main
 
 import (
 	"api_rest/api"
-	"log/slog"
+	"api_rest/service"
 	"net/http"
-	"time"
 )
 
 func main() {
-	if err := run(); err != nil {
-		slog.Error("failed execute code", "error", err)
-		return
-	}
-	slog.Info("All systems offline")
-}
-
-func run() error {
-	db := make(map[string]string)
-
-	handler := api.Handler(db)
-
-	s := http.Server{
-		ReadTimeout:  10 * time.Second,
-		IdleTimeout:  time.Minute,
-		WriteTimeout: 10 * time.Second,
-		Addr:         ":8080",
-		Handler:      handler,
+	svc := &service.Application{
+		Data: make(map[service.Id]service.User),
 	}
 
-	if err := s.ListenAndServe(); err != nil {
-		return err
+	app := &api.Application{
+		Service: svc,
 	}
 
-	return nil
+	http.ListenAndServe(":8080", app.Routes())
 }
